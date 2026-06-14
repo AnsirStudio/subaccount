@@ -1,0 +1,13 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Default permissions for the main SubAccount window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:webview:deny-internal-toggle-devtools",
+    "core:window:allow-set-size",
+    "core:window:allow-set-size-constraints",
+    "core:window:allow-start-dragging"
+  ]
+}

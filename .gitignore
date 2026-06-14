@@ -1,0 +1,23 @@
+.build/
+.swiftpm/
+node_modules/
+dist/
+src-tauri/target/
+.DS_Store
+DerivedData/
+*.xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Local-only project guidance and Codex workspace files
+AGENTS.md
+.agents/
+.codex/
+skills-lock.json
+
+# Local source assets. Runtime-ready assets live in public/.
+asset/
+
+# Local planning / helper files
+DEVELOPMENT_PLAN.md
+script/
