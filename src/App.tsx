@@ -46,7 +46,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -1927,6 +1927,14 @@ function DetailedSubscriptionsPage({
     return displayMode === "table" ? sortTableSubscriptions(filtered, tableSort, tableDirection) : sortDetailedSubscriptions(filtered, sort, direction);
   }, [autoRenewFilter, categoryFilter, cycleFilter, detailQuery, direction, displayMode, paymentFilter, paymentOptions, reminderFilter, sort, subscriptions, t, tableDirection, tableSort]);
   const groupedDetailedSubscriptions = useMemo(() => groupDetailedSubscriptions(filteredAndSortedSubscriptions), [filteredAndSortedSubscriptions]);
+  const [page, setPage] = useState(1);
+  const pageSize = 48;
+  const totalPages = Math.max(Math.ceil(groupedDetailedSubscriptions.length / pageSize), 1);
+  const visibleGroups = useMemo(() => groupedDetailedSubscriptions.slice((page - 1) * pageSize, page * pageSize), [groupedDetailedSubscriptions, page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [detailQuery, cycleFilter, paymentFilter, categoryFilter, autoRenewFilter, reminderFilter, sort, direction, tableSort, tableDirection]);
 
   if (subscriptions.length === 0) {
     return <BlankPage />;
@@ -1999,7 +2007,7 @@ function DetailedSubscriptionsPage({
 
       {displayMode === "table" ? (
         <DetailedSubscriptionsTable
-          groups={groupedDetailedSubscriptions}
+          groups={visibleGroups}
           paymentOptions={paymentOptions}
           categoryOptions={categoryOptionsForLanguage}
           cycleOptions={cycleOptionsForLanguage}
@@ -2028,8 +2036,68 @@ function DetailedSubscriptionsPage({
           {t("filter.noResults")}
         </Card>
       ) : (
-        <DetailedSubscriptionsCards groups={groupedDetailedSubscriptions} paymentOptions={paymentOptions} onOpen={onOpen} />
+        <DetailedSubscriptionsCards groups={visibleGroups} paymentOptions={paymentOptions} onOpen={onOpen} />
       )}
+
+      {totalPages > 1 ? (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                text={t("pagination.previous")}
+                onClick={(event) => {
+                  event.preventDefault();
+                  setPage((current) => Math.max(current - 1, 1));
+                }}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, index) => index + 1)
+              .filter((pageNumber) => {
+                if (totalPages <= 7) return true;
+                if (pageNumber === 1 || pageNumber === totalPages) return true;
+                if (Math.abs(pageNumber - page) <= 1) return true;
+                return false;
+              })
+              .flatMap((pageNumber, index, array) => {
+                const prev = array[index - 1];
+                const items: React.ReactNode[] = [];
+                if (prev !== undefined && pageNumber - prev > 1) {
+                  items.push(
+                    <PaginationItem key={`ellipsis-${pageNumber}`}>
+                      <PaginationEllipsis />
+                    </PaginationItem>,
+                  );
+                }
+                items.push(
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink
+                      href="#"
+                      isActive={pageNumber === page}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setPage(pageNumber);
+                      }}
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>,
+                );
+                return items;
+              })}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                text={t("pagination.next")}
+                onClick={(event) => {
+                  event.preventDefault();
+                  setPage((current) => Math.min(current + 1, totalPages));
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      ) : null}
     </div>
   );
 }
@@ -2228,14 +2296,6 @@ function DetailedSubscriptionsTable({
   onOpen: (subscription: Subscription) => void;
 }) {
   const { language, t } = usePreferences();
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
-  const totalPages = Math.max(Math.ceil(groups.length / pageSize), 1);
-  const visibleGroups = groups.slice((page - 1) * pageSize, page * pageSize);
-
-  useEffect(() => {
-    setPage(1);
-  }, [groups.length]);
 
   return (
     <div className="flex min-h-0 flex-col gap-2">
@@ -2302,13 +2362,13 @@ function DetailedSubscriptionsTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {visibleGroups.length === 0 ? (
+            {groups.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
                   {t("filter.noResults")}
                 </TableCell>
               </TableRow>
-            ) : visibleGroups.map((group) => {
+            ) : groups.map((group) => {
               const subscription = group.subscription;
               const paymentOption = paymentOptions.find((option) => option.value === subscription.paymentMethod);
               const planBadge = subscription.planName.trim() || (subscription.price === 0 ? "Free" : "-");
@@ -2359,46 +2419,6 @@ function DetailedSubscriptionsTable({
           </TableBody>
         </Table>
       </Card>
-      {totalPages > 1 ? (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                text={t("pagination.previous")}
-                onClick={(event) => {
-                  event.preventDefault();
-                  setPage((current) => Math.max(current - 1, 1));
-                }}
-              />
-            </PaginationItem>
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
-              <PaginationItem key={pageNumber}>
-                <PaginationLink
-                  href="#"
-                  isActive={pageNumber === page}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setPage(pageNumber);
-                  }}
-                >
-                  {pageNumber}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                text={t("pagination.next")}
-                onClick={(event) => {
-                  event.preventDefault();
-                  setPage((current) => Math.min(current + 1, totalPages));
-                }}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      ) : null}
     </div>
   );
 }
