@@ -146,6 +146,15 @@ export const serviceTemplates: ServiceTemplate[] = [
   { id: "alibaba-cloud", serviceName: "阿里云", iconName: "alibaba-cloud", category: "developer", defaultCycle: "monthly" },
   { id: "volcengine", serviceName: "火山引擎", iconName: "volcengine", category: "developer", defaultCycle: "monthly" },
   { id: "azure", serviceName: "Azure", iconName: "azure", category: "developer", defaultCycle: "monthly" },
+  { id: "aws", serviceName: "AWS", iconName: "aws", category: "developer", defaultCycle: "monthly" },
+  { id: "cursor", serviceName: "Cursor", iconName: "cursor", category: "ai", defaultCycle: "monthly" },
+  { id: "midjourney", serviceName: "MidJourney", iconName: "midjourney", category: "ai", defaultCycle: "monthly" },
+  { id: "suno", serviceName: "Suno", iconName: "suno", category: "ai", defaultCycle: "monthly" },
+  { id: "figma", serviceName: "Figma", iconName: "figma", category: "tool", defaultCycle: "monthly" },
+  { id: "wps", serviceName: "WPS", iconName: "wps", category: "tool", defaultCycle: "monthly" },
+  { id: "keep", serviceName: "Keep", iconName: "keep", category: "tool", defaultCycle: "monthly" },
+  { id: "obsidian", serviceName: "Obsidian", iconName: "obsidian", category: "tool", defaultCycle: "monthly" },
+  { id: "115-netdisk", serviceName: "115网盘", iconName: "115-netdisk", category: "cloud", defaultCycle: "monthly" },
 ];
 
 const storageKey = "sub-account.subscriptions.v2";
@@ -225,6 +234,8 @@ export function iconPath(iconName: string) {
     youku: "优酷-copy.svg",
     claude: "Claude.svg",
     vercel: "Vercel.svg",
+    obsidian: "obsidian-icon.svg",
+    "115-netdisk": "115网盘.svg",
   };
   return `/icons/${aliases[iconName] ?? `${iconName}.svg`}`;
 }
