@@ -1928,7 +1928,7 @@ function DetailedSubscriptionsPage({
   }, [autoRenewFilter, categoryFilter, cycleFilter, detailQuery, direction, displayMode, paymentFilter, paymentOptions, reminderFilter, sort, subscriptions, t, tableDirection, tableSort]);
   const groupedDetailedSubscriptions = useMemo(() => groupDetailedSubscriptions(filteredAndSortedSubscriptions), [filteredAndSortedSubscriptions]);
   const [page, setPage] = useState(1);
-  const pageSize = 48;
+  const pageSize = 10;
   const totalPages = Math.max(Math.ceil(groupedDetailedSubscriptions.length / pageSize), 1);
   const visibleGroups = useMemo(() => groupedDetailedSubscriptions.slice((page - 1) * pageSize, page * pageSize), [groupedDetailedSubscriptions, page]);
 
@@ -2933,6 +2933,14 @@ function AddSelectPage({
     if (!term) return true;
     return `${template.serviceName} ${serviceLabel(template, t)} ${categoryText(template.category, undefined, t)}`.toLowerCase().includes(term);
   });
+  const [page, setPage] = useState(1);
+  const pageSize = 48;
+  const totalPages = Math.max(Math.ceil(filteredTemplates.length / pageSize), 1);
+  const visibleTemplates = filteredTemplates.slice((page - 1) * pageSize, page * pageSize);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query]);
 
   return (
     <div className="flex min-h-[calc(100vh-160px)] flex-1 flex-col">
@@ -2953,7 +2961,7 @@ function AddSelectPage({
           <Card className="flex min-h-[260px] items-center justify-center p-8 text-center text-sm text-zinc-500">{t("add.noResults")}</Card>
         ) : (
           <div className="grid grid-cols-4 gap-2">
-            {filteredTemplates.map((template) => {
+            {visibleTemplates.map((template) => {
               const subscription = makeSubscriptionFromTemplate(template);
               return (
                 <button
@@ -2972,6 +2980,66 @@ function AddSelectPage({
           </div>
         )}
       </div>
+
+      {totalPages > 1 ? (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                text={t("pagination.previous")}
+                onClick={(event) => {
+                  event.preventDefault();
+                  setPage((current) => Math.max(current - 1, 1));
+                }}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, index) => index + 1)
+              .filter((pageNumber) => {
+                if (totalPages <= 7) return true;
+                if (pageNumber === 1 || pageNumber === totalPages) return true;
+                if (Math.abs(pageNumber - page) <= 1) return true;
+                return false;
+              })
+              .flatMap((pageNumber, index, array) => {
+                const prev = array[index - 1];
+                const items: React.ReactNode[] = [];
+                if (prev !== undefined && pageNumber - prev > 1) {
+                  items.push(
+                    <PaginationItem key={`ellipsis-${pageNumber}`}>
+                      <PaginationEllipsis />
+                    </PaginationItem>,
+                  );
+                }
+                items.push(
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink
+                      href="#"
+                      isActive={pageNumber === page}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setPage(pageNumber);
+                      }}
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>,
+                );
+                return items;
+              })}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                text={t("pagination.next")}
+                onClick={(event) => {
+                  event.preventDefault();
+                  setPage((current) => Math.min(current + 1, totalPages));
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      ) : null}
     </div>
   );
 }
