@@ -1,40 +1,47 @@
 # JioJio — Subscription & Account Manager
 
-A local-first, cross-platform subscription management desktop app built with **Tauri 2 + React 19 + TypeScript + Tailwind CSS v4 + shadcn/ui**.
+Track your subscriptions. Manage your accounts. Keep everything local.
 
-Track all your subscriptions — video streaming, AI tools, cloud services, music, and more — in one place. All data stays on your device.
+Most apps help you track subscriptions. **JioJio** goes further — it also helps you manage the **accounts and login methods** behind them. Which email did you use? Which phone number? Did you sign up with Google, WeChat, or Apple ID? How many accounts do you have on the same platform? JioJio keeps all of this organized so you never lose track again.
+
+## Why JioJio?
+
+**You have more subscriptions than you think.** Video, music, AI tools, cloud storage, developer services — they add up fast. And each one has a login method, maybe multiple accounts, different billing cycles, different currencies.
+
+**You forget which account you used.** Google login on one, WeChat on another, a third with your work email. JioJio lets you record and match every account to every subscription, so you always know where to log in.
+
+**Your data stays yours.** Everything is stored locally on your device. No cloud sync, no account registration, no data collection.
 
 ## Features
 
-### Subscription Management
-- **40+ built-in service templates** — Netflix, YouTube, ChatGPT, Claude, Spotify, iCloud+, Notion, Vercel, and many more
-- **9 categories** — Video, AI, Developer, Cloud, Tools, Music, Social, Shopping, Custom
-- **Flexible billing cycles** — Monthly, Yearly, or Custom (N days)
-- **Auto-renew tracking** — Know which subscriptions renew automatically
-- **Pin important subscriptions** — Keep priority items at the top
+### Subscription Tracking
+- **50+ built-in service templates** across 9 categories (Video, AI, Developer, Cloud, Tools, Music, Social, Shopping) — with more being added regularly
+- **Custom subscriptions** — add any service manually, not limited to built-in templates
+- **Flexible billing cycles** — monthly, yearly, or custom days
+- **Auto-renew tracking** and **expiry reminders** (same day, 1/3/7 days before)
+- **Pin important subscriptions** to the top
+
+### Account & Login Management
+- Record **login methods** for each subscription — Phone, WeChat, Email, QQ, Gmail, Apple ID, GitHub
+- Store **account identifiers** — know exactly which account is tied to which service
+- Manage **multiple accounts** on the same platform without confusion
 
 ### Financial Overview
-- **Dashboard with key metrics** — Monthly cost, annualized cost, upcoming payments
-- **Multi-currency support** — CNY, USD, EUR, JPY, GBP, HKD, AUD, CAD, SGD, TRY, NGN
-- **Auto CNY conversion** — All costs normalized to CNY for a unified view
-- **Category breakdown** — See where your money goes
-- **Cashflow timeline** — Past 12 months actual + 3 months forecast
+- **Dashboard** with monthly cost, annualized cost, and upcoming payments
+- **Multi-currency support** (10+ currencies) with automatic conversion to your preferred base currency
+- **Category breakdown** — see where your money goes
+- **Cashflow timeline** — past 12 months actual + 3 months forecast
 
 ### Views & Filtering
-- **Card view & Table view** — Switch between visual layouts
-- **Sort by** — End date, start date, monthly price, annual price
-- **Filter by** — Billing cycle, payment method, category, auto-renew status, reminder status
-- **Search** — Find subscriptions quickly
+- **Card view** and **Table view**
+- **Sort** by end date, start date, monthly price, annual price
+- **Filter** by billing cycle, payment method, category, auto-renew status, reminder status
+- **Search** across all subscriptions
 
-### Account & Reminders
-- **Login method tracking** — Phone, WeChat, Email, QQ, Gmail, Apple ID, GitHub
-- **Expiry reminders** — Same day, 1 day, 3 days, or 7 days before expiry
-- **Payment method tracking** — App Store, WeChat Pay, Alipay, Credit Card, PayPal, and more
-
-### Preferences
-- **Bilingual UI** — Chinese (中文) and English
-- **Theme** — System, Light, Dark
-- **Custom exchange rates** — Adjust currency conversion rates
+### Personalization
+- **Bilingual UI** — Chinese (中文) / English
+- **Theme** — System / Light / Dark
+- **Custom exchange rates** — adjust currency conversion as needed
 
 ## Tech Stack
 
@@ -45,36 +52,7 @@ Track all your subscriptions — video streaming, AI tools, cloud services, musi
 | Styling | [Tailwind CSS v4](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) |
 | Icons | [Lucide React](https://lucide.dev/) + custom SVGs |
 | Build | [Vite](https://vite.dev/) |
-| Language | [Rust](https://www.rust-lang.org/) (backend) + TypeScript (frontend) |
-
-## Project Structure
-
-```
-subaccount/
-├── src/                    # Frontend source
-│   ├── App.tsx             # Main application (views, routing, i18n)
-│   ├── main.tsx            # React entry point
-│   ├── styles.css          # Global styles + Tailwind config
-│   ├── components/ui/      # shadcn/ui components
-│   └── lib/
-│       ├── subscriptions.ts # Data models, service templates, utilities
-│       └── utils.ts         # Helper functions
-├── src-tauri/              # Tauri / Rust backend
-│   ├── src/
-│   │   ├── main.rs         # Rust entry point
-│   │   └── lib.rs          # Tauri plugin setup
-│   ├── tauri.conf.json     # Tauri configuration
-│   └── Cargo.toml          # Rust dependencies
-├── public/                 # Static assets
-│   ├── icons/              # Service icons (SVG)
-│   ├── payment-icons/      # Payment method icons
-│   └── loginmethod-icons/  # Login method icons
-├── asset/                  # Local source assets (git-ignored)
-├── package.json
-├── vite.config.ts
-├── tsconfig.json
-└── components.json         # shadcn/ui configuration
-```
+| Backend | [Rust](https://www.rust-lang.org/) |
 
 ## Getting Started
 
@@ -82,54 +60,26 @@ subaccount/
 
 - [Node.js](https://nodejs.org/) (v18+)
 - [Rust](https://www.rust-lang.org/tools/install) (latest stable)
-- [Tauri Prerequisites](https://v2.tauri.app/start/prerequisites/) — platform-specific build tools
+- [Tauri Prerequisites](https://v2.tauri.app/start/prerequisites/)
 
-### Install
+### Install & Run
 
 ```bash
-# Clone the repository
-git clone https://github.com/AnsirStudio/subaccount.git
-cd subaccount
-
-# Install dependencies
+git clone https://github.com/AnsirStudio/JioJio.git
+cd JioJio
 npm install
-```
-
-### Development
-
-```bash
-# Start the Tauri dev server (opens the desktop app)
 npm run tauri dev
 ```
 
 ### Build
 
 ```bash
-# Build the production desktop app
 npm run tauri build
-```
-
-### Web Only (without Tauri)
-
-```bash
-# Start the Vite dev server (browser)
-npm run dev
-
-# Build for web
-npm run build
 ```
 
 ## Data Storage
 
-All subscription data is stored in the browser's **localStorage** under the key `sub-account.subscriptions.v2`. No data is sent to any server.
-
-## Supported Services
-
-SubAccount currently includes **40+ common subscription services** across 9 categories — Video, AI, Developer, Cloud, Tools, Music, Social, Shopping, and Custom. The template library is continuously expanding. You can also add any service manually via the **Custom** option.
-
-## Supported Currencies
-
-10+ common currencies are supported, with automatic conversion to your preferred base currency for a unified cost overview.
+All data is stored locally in the browser's **localStorage**. Nothing is sent to any server. No account or registration required.
 
 ## Disclaimer
 
