@@ -10,7 +10,7 @@ JioJio helps you keep track of every recurring subscription — and just as impo
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white">
   <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white">
   <img alt="Rust" src="https://img.shields.io/badge/Rust-stable-CE422B?logo=rust&logoColor=white">
-  <img alt="Platform" src="https://img.shields.io/badge/Platform-macOS%20(Apple%20Silicon)-000000?logo=apple&logoColor=white">
+  <img alt="Platform" src="https://img.shields.io/badge/Platform-macOS%20(Apple%20Silicon%20%26%20Intel)-000000?logo=apple&logoColor=white">
   <img alt="License" src="https://img.shields.io/badge/License-MIT-3DA639">
 </p>
 
@@ -78,9 +78,10 @@ By linking the two, JioJio answers the questions that spreadsheets can't: *"How 
 
 ## Platform Support
 
-The pre-built `.dmg` release is currently for **macOS on Apple Silicon (M-series chips: M1/M2/M3/M4 and newer)** only.
+Each release ships two `.dmg` files for macOS:
 
-If you're on an Intel Mac, you'll need to build from source (see below) — Tauri can still produce an Intel-compatible build, it's just not part of the pre-built release yet.
+- **`JioJio_x.y.z_aarch64.dmg`** — for Apple Silicon Macs (M1/M2/M3/M4 and newer). Smaller download, native performance.
+- **`JioJio_x.y.z_universal.dmg`** — a universal binary that runs on both Apple Silicon and Intel Macs. Larger download; pick this one if you're on an Intel Mac.
 
 ## Getting Started
 

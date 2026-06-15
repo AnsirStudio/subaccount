@@ -10,7 +10,7 @@ JioJio 帮你记清楚每一个持续扣费的订阅 —— 更重要的是，**
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white">
   <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white">
   <img alt="Rust" src="https://img.shields.io/badge/Rust-stable-CE422B?logo=rust&logoColor=white">
-  <img alt="Platform" src="https://img.shields.io/badge/Platform-macOS%20(Apple%20Silicon)-000000?logo=apple&logoColor=white">
+  <img alt="Platform" src="https://img.shields.io/badge/Platform-macOS%20(Apple%20Silicon%20%26%20Intel)-000000?logo=apple&logoColor=white">
   <img alt="License" src="https://img.shields.io/badge/License-MIT-3DA639">
 </p>
 
@@ -78,9 +78,10 @@ JioJio 围绕两个互相关联的概念构建：
 
 ## 平台支持
 
-目前发布的 `.dmg` 安装包仅适用于 **搭载 Apple 芯片（M 系列芯片：M1/M2/M3/M4 及更新机型）的 Mac**。
+每个发布版本都包含两个 macOS 安装包：
 
-如果你使用的是 Intel 芯片的 Mac，需要自行从源码构建（见下方）—— Tauri 同样可以构建出适用于 Intel 芯片的版本，只是目前还未包含在预编译发布包中。
+- **`JioJio_x.y.z_aarch64.dmg`** —— 适用于搭载 Apple 芯片（M 系列：M1/M2/M3/M4 及更新机型）的 Mac，体积更小，原生性能更佳。
+- **`JioJio_x.y.z_universal.dmg`** —— 通用版本，同时支持 Apple 芯片和 Intel 芯片的 Mac。体积稍大；如果你使用 Intel Mac，请选择这个版本。
 
 ## 快速开始
 

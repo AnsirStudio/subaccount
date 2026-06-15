@@ -13,6 +13,7 @@ DerivedData/
 AGENTS.md
 .agents/
 .codex/
+.claude/
 skills-lock.json
 
 # Local source assets. Runtime-ready assets live in public/.

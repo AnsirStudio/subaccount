@@ -65,14 +65,26 @@ export function ServiceIcon({
     xl: "h-24 w-24 rounded-3xl",
   }[size];
   const iconScaleOverrides: Record<string, string> = {
-    capcut: "scale-125",
+    capcut: "scale-150",
     cloudflare: "scale-125",
     gemini: "scale-110",
     claude: "scale-110",
     chatgpt: "scale-110",
   };
   const iconScaleClass = iconScaleOverrides[subscription.iconName];
-  const shouldInvertInDarkMode = subscription.iconName === "chatgpt" || subscription.iconName === "deno";
+  const invertInDarkModeIcons = new Set([
+    "chatgpt",
+    "deno",
+    "midjourney",
+    "perplexity",
+    "suno",
+    "jimeng",
+    "notion",
+    "x",
+    "grok",
+    "aws",
+  ]);
+  const shouldInvertInDarkMode = invertInDarkModeIcons.has(subscription.iconName);
 
   if (subscription.iconDataUrl) {
     return (
