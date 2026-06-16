@@ -1,10 +1,10 @@
-# JioJio
+<div align="center">
+  <img src="src-tauri/icons/128x128@2x.png" width="100" alt="JioJio">
+  <h1>JioJio</h1>
+  <p><strong>本地优先的订阅与账号管理工具。</strong></p>
+</div>
 
-**本地优先的订阅与账号管理工具。**
-
-JioJio 帮你记清楚每一个持续扣费的订阅 —— 更重要的是，**记清楚你当时用的是哪个账号注册的**。再也不用纠结"这个到底是用 Gmail 还是工作邮箱注册的"。
-
-<p align="left">
+<p align="center">
   <img alt="Tauri" src="https://img.shields.io/badge/Tauri-2-FFC131?logo=tauri&logoColor=white">
   <img alt="React" src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white">
@@ -14,7 +14,24 @@ JioJio 帮你记清楚每一个持续扣费的订阅 —— 更重要的是，**
   <img alt="License" src="https://img.shields.io/badge/License-MIT-3DA639">
 </p>
 
-[English](README.md) | 简体中文
+<p align="center"><a href="README.md">English</a> | 简体中文</p>
+
+---
+
+<table align="center" cellspacing="8" cellpadding="0" border="0">
+  <tr>
+    <td><img src="docs/screenshots/rounded/总览-Chinese.png" width="380" alt="总览"></td>
+    <td><img src="docs/screenshots/rounded/添加-中文.png" width="380" alt="添加订阅"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/rounded/常用账号-中文.png" width="380" alt="常用账号"></td>
+    <td><img src="docs/screenshots/rounded/ai费用中文.png" width="380" alt="AI 订阅价格"></td>
+  </tr>
+</table>
+
+---
+
+JioJio 帮你记清楚每一个持续扣费的订阅 —— 更重要的是，**记清楚你当时用的是哪个账号注册的**。再也不用纠结"这个到底是用 Gmail 还是工作邮箱注册的"。
 
 ## 为什么是 JioJio？
 
@@ -42,11 +59,27 @@ JioJio 围绕两个互相关联的概念构建：
 - **自动续费追踪** 与 **到期提醒**（当天，或提前 1/3/7 天）
 - **置顶重要订阅**，一目了然
 
+<img src="docs/screenshots/rounded/添加-中文.png" width="480" alt="添加订阅 — 浏览 50+ 内置服务模板">
+
 ### 账号与登录管理
 - 为每个订阅记录**登录方式**（手机号、邮箱、第三方/社交登录等）
 - 存储**账号标识**，随时知道哪个登录对应哪个服务
 - **按账号** 或 **按平台** 两种视角查看，一眼看出每个账号关联了多少订阅
 - 轻松管理**同一平台下的多个账号**，不再混淆
+
+<img src="docs/screenshots/rounded/常用账号-中文.png" width="480" alt="常用账号 —— 管理登录身份">
+
+### AI 订阅价格参考
+
+设置页面内置 **AI 订阅** 价格参考面板，覆盖 ChatGPT、Claude、Gemini：
+
+- 在一处浏览所有套餐档位（Free、Plus、Pro、Team 等）
+- **汇率对应价格** —— 所有价格按当前汇率折算为你的本地货币，方便直接比较
+- **按价格排序** —— 从低到高排列，序号一目了然，快速找到最划算的地区
+- 覆盖 **30+ 个国家和地区**，附带原始本地货币价格
+- 数据定期更新，反映最新区域定价
+
+<img src="docs/screenshots/rounded/ai费用中文.png" width="480" alt="AI 订阅价格 —— ChatGPT、Claude、Gemini 全球定价参考">
 
 ### 财务总览
 - **仪表盘** —— 月度支出、年化成本、即将到期的款项

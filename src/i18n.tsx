@@ -1,4 +1,6 @@
 import { createContext, useContext } from "react";
+import type { CurrencyCode } from "./lib/subscriptions";
+import { currencyOptions } from "./lib/subscriptions";
 
 export type LanguageCode = "zh" | "en";
 export type ThemePreference = "system" | "light" | "dark";
@@ -8,11 +10,14 @@ export type PreferencesContextValue = {
   setLanguage: (language: LanguageCode) => void;
   theme: ThemePreference;
   setTheme: (theme: ThemePreference) => void;
+  displayCurrency: CurrencyCode;
+  setDisplayCurrency: (currency: CurrencyCode) => void;
   t: (key: string) => string;
 };
 
 export const languageStorageKey = "sub-account.language";
 export const themeStorageKey = "sub-account.theme";
+export const displayCurrencyStorageKey = "sub-account.displayCurrency";
 
 export const translations: Record<LanguageCode, Record<string, string>> = {
   zh: {
@@ -33,6 +38,13 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "settings.basic": "基础设置",
     "settings.accounts": "常用账号",
     "settings.exchange": "汇率设置",
+    "settings.aiPricing": "AI订阅",
+    "aiPricing.updatedAt": "数据日期",
+    "aiPricing.plan": "套餐",
+    "aiPricing.price": "汇率对应价格",
+    "aiPricing.rank": "序号",
+    "aiPricing.region": "地区",
+    "aiPricing.original": "当地原价",
     "settings.account.hint": "管理你常用的登录账号，添加订阅时可快速选择",
     "settings.account.addPlaceholder": "输入账号…",
     "settings.account.add": "添加",
@@ -43,6 +55,13 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "settings.theme.system": "跟随系统",
     "settings.theme.light": "浅色",
     "settings.theme.dark": "深色",
+    "settings.displayCurrency": "常用币种",
+    "settings.resetData": "重置数据",
+    "settings.resetData.button": "重置",
+    "settings.resetData.confirmTitle": "重置所有数据？",
+    "settings.resetData.confirmBody": "此操作将清除所有订阅、账号和设置数据，且无法恢复。请再次确认是否继续。",
+    "settings.resetData.confirmButton": "确认重置",
+    "settings.resetData.cancel": "取消",
     "exchange.baseCurrency": "主币种",
     "exchange.rateDate": "数据日期",
     "exchange.currency": "币种",
@@ -246,9 +265,12 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "account.wechat": "微信",
     "account.email": "邮箱",
     "account.qq": "QQ",
-    "account.gmail": "Gmail",
+    "account.google": "Google",
     "account.appleId": "Apple ID",
     "account.github": "GitHub",
+    "account.microsoft": "Microsoft",
+    "account.alipay": "支付宝",
+    "account.douyin": "抖音",
     "account.noNote": "无",
     "account.notePlaceholder": "请输入备注",
     "accounts.viewByAccount": "账号视角",
@@ -301,6 +323,13 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "settings.basic": "Basic",
     "settings.accounts": "Accounts",
     "settings.exchange": "Rates",
+    "settings.aiPricing": "AI Plans",
+    "aiPricing.updatedAt": "Data as of",
+    "aiPricing.plan": "Plan",
+    "aiPricing.price": "Converted Price",
+    "aiPricing.rank": "No.",
+    "aiPricing.region": "Region",
+    "aiPricing.original": "Local Price",
     "settings.account.hint": "Manage your frequently used login accounts for quick selection when adding subscriptions",
     "settings.account.addPlaceholder": "Enter account…",
     "settings.account.add": "Add",
@@ -311,6 +340,13 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "settings.theme.system": "System",
     "settings.theme.light": "Light",
     "settings.theme.dark": "Dark",
+    "settings.displayCurrency": "Display Currency",
+    "settings.resetData": "Reset Data",
+    "settings.resetData.button": "Reset",
+    "settings.resetData.confirmTitle": "Reset all data?",
+    "settings.resetData.confirmBody": "This will permanently erase all subscriptions, accounts, and settings. This action cannot be undone. Please confirm again to continue.",
+    "settings.resetData.confirmButton": "Confirm Reset",
+    "settings.resetData.cancel": "Cancel",
     "exchange.baseCurrency": "Base Currency",
     "exchange.rateDate": "Rate date",
     "exchange.currency": "Currency",
@@ -514,9 +550,12 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "account.wechat": "WeChat",
     "account.email": "Email",
     "account.qq": "QQ",
-    "account.gmail": "Gmail",
+    "account.google": "Google",
     "account.appleId": "Apple ID",
     "account.github": "GitHub",
+    "account.microsoft": "Microsoft",
+    "account.alipay": "Alipay",
+    "account.douyin": "Douyin",
     "account.noNote": "None",
     "account.notePlaceholder": "Add a note",
     "accounts.viewByAccount": "By Account",
@@ -562,6 +601,11 @@ export function readStoredLanguage(): LanguageCode {
 export function readStoredTheme(): ThemePreference {
   const value = localStorage.getItem(themeStorageKey);
   return value === "light" || value === "dark" || value === "system" ? value : "system";
+}
+
+export function readStoredDisplayCurrency(): CurrencyCode {
+  const value = localStorage.getItem(displayCurrencyStorageKey);
+  return currencyOptions.some((option) => option.value === value) ? (value as CurrencyCode) : "CNY";
 }
 
 export function usePreferences() {

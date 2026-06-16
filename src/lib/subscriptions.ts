@@ -3,7 +3,7 @@ export type BillingCycle = "monthly" | "yearly" | "customDays";
 export type SubscriptionStatus = "active" | "cancelled";
 export type SubscriptionCategory = "video" | "ai" | "developer" | "cloud" | "tool" | "music" | "social" | "shopping" | "custom";
 export type PaymentMethod = "appStore" | "wechat" | "alipay" | "douyin" | "creditCard" | "giftCard" | "googlePay" | "paypal";
-export type AccountMethod = "phone" | "wechat" | "email" | "qq" | "gmail" | "appleId" | "github";
+export type AccountMethod = "phone" | "wechat" | "email" | "qq" | "google" | "appleId" | "github" | "microsoft" | "alipay" | "douyin";
 export type ReminderDays = 0 | 1 | 3 | 7;
 
 export type ServiceTemplate = {
@@ -74,9 +74,12 @@ export const accountMethodOptions: Array<{ value: AccountMethod; label: string; 
   { value: "wechat", label: "微信", iconPath: "/loginmethod-icons/wechat.svg" },
   { value: "email", label: "邮箱", iconPath: "/loginmethod-icons/email.svg" },
   { value: "qq", label: "QQ", iconPath: "/loginmethod-icons/qq.svg" },
-  { value: "gmail", label: "Gmail", iconPath: "/loginmethod-icons/gmail.svg" },
+  { value: "google", label: "Google", iconPath: "/loginmethod-icons/google.svg" },
   { value: "appleId", label: "Apple ID", iconPath: "/loginmethod-icons/apple-id.svg" },
   { value: "github", label: "GitHub", iconPath: "/loginmethod-icons/github.svg" },
+  { value: "microsoft", label: "Microsoft", iconPath: "/loginmethod-icons/microsoft.svg" },
+  { value: "alipay", label: "支付宝", iconPath: "/loginmethod-icons/alipay.svg" },
+  { value: "douyin", label: "抖音", iconPath: "/loginmethod-icons/douyin.svg" },
 ];
 
 export const categoryOptions: Array<{ value: SubscriptionCategory; label: string }> = [
@@ -329,7 +332,7 @@ export function normalizeSubscription(subscription: Subscription): Subscription 
     planName: templateMatch?.id && !subscription.planName.trim() ? defaultPlanNames[templateMatch.id] ?? "" : subscription.planName,
     price: Math.max(Number(subscription.price) || 0, 0),
     paymentMethod: subscription.paymentMethod ?? "appStore",
-    accountMethod: subscription.accountMethod ?? "phone",
+    accountMethod: (subscription.accountMethod as string) === "gmail" ? "google" : subscription.accountMethod ?? "phone",
     accountIdentifier: subscription.accountIdentifier ?? "",
     isPinned: subscription.isPinned ?? false,
     isReminderEnabled: subscription.isReminderEnabled ?? false,
@@ -368,6 +371,11 @@ export function monthlyEquivalent(subscription: Subscription) {
 export function toCny(amount: number, currency: CurrencyCode) {
   const unitPerCny = currencyOptions.find((item) => item.value === currency)?.unitPerCny ?? 1;
   return amount / unitPerCny;
+}
+
+export function fromCny(amountCny: number, currency: CurrencyCode) {
+  const unitPerCny = currencyOptions.find((item) => item.value === currency)?.unitPerCny ?? 1;
+  return amountCny * unitPerCny;
 }
 
 export function summarize(subscriptions: Subscription[]) {

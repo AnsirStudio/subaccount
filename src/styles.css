@@ -117,6 +117,7 @@ input[type="date"] {
   background: color-mix(in oklch, var(--secondary), var(--foreground) 5%) !important;
 }
 
+
 .settings-segment-button[data-slot="toggle-group-item"] {
   font-size: 11px !important;
   font-weight: 700 !important;

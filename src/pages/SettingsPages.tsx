@@ -1,28 +1,31 @@
-import { Check, Copy, Edit3, Plus, X } from "lucide-react";
-import type { ReactNode } from "react";
-import { useState } from "react";
+import { Check, Copy, Edit3, GripHorizontal, Plus, X } from "lucide-react";
+import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { accountMethodOptions, currencyOptions } from "../lib/subscriptions";
+import { currencyOptions } from "../lib/subscriptions";
 import type { CurrencyCode } from "../lib/subscriptions";
 import { usePreferences } from "../i18n";
 import type { LanguageCode, ThemePreference } from "../i18n";
-import { loadAccountStore, saveAccountStore } from "../lib/accountStore";
+import { getOrderedAccountMethodOptions, loadAccountStore, saveAccountMethodOrder, saveAccountStore } from "../lib/accountStore";
 import type { AccountEntry, AccountStore } from "../lib/accountStore";
-import { currencyDisplayLabel, exchangeRateDate, formatExchangeAmount } from "../lib/format";
+import { currencyDisplayLabel, exchangeRateDate, formatExchangeAmount, formatMoneyFromCny } from "../lib/format";
+import { aiPricingData, aiPricingUpdatedAt } from "../lib/aiPricing";
+import type { AiPricingPlatform } from "../lib/aiPricing";
 import { CurrencyLabel, FlagIcon, PaymentIcon } from "../components/icons";
 import { ExchangeCurrencySelect } from "../components/selects";
 import { cn } from "../lib/utils";
 
-export type SettingsTab = "basic" | "accounts" | "exchange";
+export type SettingsTab = "basic" | "accounts" | "exchange" | "aiPricing";
 
 export function SettingsPage({ activeTab }: { activeTab: SettingsTab }) {
   if (activeTab === "exchange") return <ExchangeSettings />;
   if (activeTab === "accounts") return <AccountSettings />;
+  if (activeTab === "aiPricing") return <AiPricingSettings />;
   return <BasicSettings />;
 }
 
@@ -36,7 +39,13 @@ export function FieldRow({ label, children }: { label: string; children: ReactNo
 }
 
 function BasicSettings() {
-  const { language, setLanguage, theme, setTheme, t } = usePreferences();
+  const { language, setLanguage, theme, setTheme, displayCurrency, setDisplayCurrency, t } = usePreferences();
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
+
+  function resetAllData() {
+    localStorage.clear();
+    window.location.reload();
+  }
 
   return (
     <Card className="gap-0 px-5">
@@ -81,6 +90,30 @@ function BasicSettings() {
           </ToggleGroupItem>
         </ToggleGroup>
       </FieldRow>
+      <FieldRow label={t("settings.displayCurrency")}>
+        <ExchangeCurrencySelect className="w-36" variant="boxed" value={displayCurrency} onValueChange={setDisplayCurrency} />
+      </FieldRow>
+      <FieldRow label={t("settings.resetData")}>
+        <Button variant="destructive" size="sm" onClick={() => setIsResetConfirmOpen(true)}>
+          {t("settings.resetData.button")}
+        </Button>
+      </FieldRow>
+      {isResetConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-80 rounded-lg border border-border bg-background p-5 shadow-lg">
+            <div className="text-sm font-semibold">{t("settings.resetData.confirmTitle")}</div>
+            <div className="mt-2 text-xs text-muted-foreground">{t("settings.resetData.confirmBody")}</div>
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => setIsResetConfirmOpen(false)}>
+                {t("settings.resetData.cancel")}
+              </Button>
+              <Button variant="destructive" size="sm" onClick={resetAllData}>
+                {t("settings.resetData.confirmButton")}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }
@@ -148,6 +181,211 @@ function ExchangeSettings() {
   );
 }
 
+const aiPricingPlatformLabels: Record<AiPricingPlatform, string> = {
+  chatgpt: "ChatGPT",
+  claude: "Claude",
+  gemini: "Gemini",
+};
+
+type AiTabGeom = { w: number; h: number; tabTop: number; tabBottom: number; tabLeft: number; tabWidth: number };
+
+// Build a single continuous outline for the whole panel *including* the active
+// tab "bump", so the tab and content card are one shape (no two-element seam).
+// Concave "ears" connect the tab sides to the panel top edge, Chrome-tab style.
+function buildAiTabPath(g: AiTabGeom): string {
+  const ear = 10; // ear (cove) radius
+  const rt = 9; // tab top corner radius
+  const rc = 14; // panel corner radius
+  const w = Math.round(g.w);
+  const h = Math.round(g.h);
+  const pTop = Math.round(g.tabBottom); // panel top edge = active tab bottom
+  const aL = Math.round(g.tabLeft);
+  const aR = Math.round(g.tabLeft + g.tabWidth);
+  const L = 0.5;
+  const R = w - 0.5;
+  const B = h - 0.5;
+  const T = Math.round(g.tabTop) + 0.5; // tab top edge
+  const hasLeftEar = aL > L + ear + 1;
+  const hasRightEar = aR < R - ear - 1;
+
+  const d: string[] = [];
+  d.push(`M ${L} ${pTop}`);
+  if (hasLeftEar) {
+    d.push(`L ${aL - ear} ${pTop}`);
+    d.push(`A ${ear} ${ear} 0 0 0 ${aL} ${pTop - ear}`); // concave ear up
+    d.push(`L ${aL} ${T + rt}`);
+    d.push(`A ${rt} ${rt} 0 0 1 ${aL + rt} ${T}`); // tab top-left
+  } else {
+    d.push(`L ${L} ${T + rt}`);
+    d.push(`A ${rt} ${rt} 0 0 1 ${L + rt} ${T}`);
+  }
+  const topRight = hasRightEar ? aR : R;
+  d.push(`L ${topRight - rt} ${T}`);
+  d.push(`A ${rt} ${rt} 0 0 1 ${topRight} ${T + rt}`); // tab top-right
+  if (hasRightEar) {
+    d.push(`L ${aR} ${pTop - ear}`);
+    d.push(`A ${ear} ${ear} 0 0 0 ${aR + ear} ${pTop}`); // concave ear down
+    d.push(`L ${R} ${pTop}`);
+  }
+  d.push(`L ${R} ${B - rc}`);
+  d.push(`A ${rc} ${rc} 0 0 1 ${R - rc} ${B}`); // bottom-right
+  d.push(`L ${L + rc} ${B}`);
+  d.push(`A ${rc} ${rc} 0 0 1 ${L} ${B - rc}`); // bottom-left
+  d.push(`L ${L} ${pTop}`);
+  d.push("Z");
+  return d.join(" ");
+}
+
+function AiPricingSettings() {
+  const { language, displayCurrency, t } = usePreferences();
+  const [platform, setPlatform] = useState<AiPricingPlatform>("chatgpt");
+  const [planIndexByPlatform, setPlanIndexByPlatform] = useState<Record<AiPricingPlatform, number>>({
+    chatgpt: 0,
+    claude: 0,
+    gemini: 0,
+  });
+  const plans = aiPricingData[platform];
+  const planIndex = Math.min(planIndexByPlatform[platform], plans.length - 1);
+  const plan = plans[planIndex];
+
+  const planButtonRefs = useRef<(HTMLElement | null)[]>([]);
+  const [planButtonWidth, setPlanButtonWidth] = useState<number>();
+
+  useLayoutEffect(() => {
+    setPlanButtonWidth(undefined);
+    const frame = requestAnimationFrame(() => {
+      const widths = planButtonRefs.current.filter((el): el is HTMLElement => el != null).map((el) => el.getBoundingClientRect().width);
+      if (widths.length) setPlanButtonWidth(Math.max(...widths));
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [platform, language]);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Record<AiPricingPlatform, HTMLButtonElement | null>>({ chatgpt: null, claude: null, gemini: null });
+  const [tabPath, setTabPath] = useState("");
+  const [svgSize, setSvgSize] = useState({ w: 0, h: 0 });
+
+  useLayoutEffect(() => {
+    const compute = () => {
+      const container = containerRef.current;
+      const tab = tabRefs.current[platform];
+      if (!container || !tab) return;
+      const cb = container.getBoundingClientRect();
+      const tb = tab.getBoundingClientRect();
+      setSvgSize({ w: cb.width, h: cb.height });
+      setTabPath(
+        buildAiTabPath({
+          w: cb.width,
+          h: cb.height,
+          tabTop: tb.top - cb.top,
+          tabBottom: tb.bottom - cb.top,
+          tabLeft: tb.left - cb.left,
+          tabWidth: tb.width,
+        }),
+      );
+    };
+    compute();
+    const observer = new ResizeObserver(compute);
+    if (containerRef.current) observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [platform, language]);
+
+  return (
+    <div ref={containerRef} className="relative h-full">
+      <svg
+        className="pointer-events-none absolute inset-0"
+        width={svgSize.w}
+        height={svgSize.h}
+        viewBox={`0 0 ${svgSize.w} ${svgSize.h}`}
+        fill="none"
+        aria-hidden
+      >
+        <path d={tabPath} fill="var(--card)" stroke="var(--border)" strokeWidth={1} />
+      </svg>
+
+      <div className="relative flex h-full flex-col">
+        <div className="flex items-end justify-between gap-3 pr-3">
+          <div className="flex gap-5">
+            {(Object.keys(aiPricingData) as AiPricingPlatform[]).map((value) => (
+              <button
+                key={value}
+                ref={(el) => {
+                  tabRefs.current[value] = el;
+                }}
+                type="button"
+                onClick={() => setPlatform(value)}
+                className={cn(
+                  "px-4 py-1.5 text-xs font-bold transition-colors",
+                  platform === value ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {aiPricingPlatformLabels[value]}
+              </button>
+            ))}
+          </div>
+          <div className="pb-1.5 text-xs text-muted-foreground">{t("aiPricing.updatedAt")} {aiPricingUpdatedAt}</div>
+        </div>
+
+        <div className="flex min-h-0 flex-1 flex-col gap-3 p-3">
+          <ToggleGroup
+          type="single"
+          value={String(planIndex)}
+          onValueChange={(value) => {
+            if (value) setPlanIndexByPlatform((prev) => ({ ...prev, [platform]: Number(value) }));
+          }}
+          variant="outline"
+          size="sm"
+          spacing={0}
+          className="flex-wrap justify-start"
+        >
+          {plans.map((p, index) => (
+            <ToggleGroupItem
+              key={p.nameEn}
+              ref={(el) => {
+                planButtonRefs.current[index] = el;
+              }}
+              style={planButtonWidth ? { width: planButtonWidth } : undefined}
+              className="settings-segment-button -mt-px -ml-px h-7 rounded-none border! border-border! px-3 data-[state=on]:bg-zinc-200 data-[state=on]:text-zinc-950 dark:data-[state=on]:bg-white dark:data-[state=on]:text-zinc-950"
+              value={String(index)}
+            >
+              {language === "en" ? p.nameEn : p.nameZh}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+
+        <div className="min-h-0 flex-1 overflow-y-auto rounded-md border border-border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12 tabular-nums">{t("aiPricing.rank")}</TableHead>
+                <TableHead>{t("aiPricing.region")}</TableHead>
+                <TableHead className="text-right">{t("aiPricing.original")}</TableHead>
+                <TableHead className="text-right">{t("aiPricing.price")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {plan.regions.map((region, index) => (
+                <TableRow key={region.countryCode}>
+                  <TableCell className="tabular-nums text-muted-foreground">{index + 1}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <FlagIcon countryCode={region.countryCode} />
+                      <span>{language === "en" ? region.countryEn : region.countryZh}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right text-muted-foreground">{region.original}</TableCell>
+                  <TableCell className="text-right font-semibold">{formatMoneyFromCny(region.priceCny, displayCurrency)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function parseDecimalTextInput(value: string) {
   return value
     .replace(/。/g, ".")
@@ -166,10 +404,65 @@ function AccountSettings() {
   const [editValue, setEditValue] = useState("");
   const [editNote, setEditNote] = useState("");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [orderedMethods, setOrderedMethods] = useState(getOrderedAccountMethodOptions);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const dragIndexRef = useRef<number | null>(null);
+  const orderRef = useRef(orderedMethods);
+  orderRef.current = orderedMethods;
 
-  const allMethods = accountMethodOptions;
+  const allMethods = orderedMethods;
   const noNoteLabel = t("account.noNote");
   const notePlaceholder = t("account.notePlaceholder");
+
+  function handleDragHandlePointerDown(index: number, event: ReactPointerEvent) {
+    event.preventDefault();
+    window.getSelection()?.removeAllRanges();
+    dragIndexRef.current = index;
+    setDragIndex(index);
+    const previousUserSelect = document.body.style.userSelect;
+    const previousCursor = document.body.style.cursor;
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = "grabbing";
+
+    function handlePointerMove(event: PointerEvent) {
+      const dragIdx = dragIndexRef.current;
+      if (dragIdx === null) return;
+      for (let i = 0; i < cardRefs.current.length; i++) {
+        if (i === dragIdx) continue;
+        const el = cardRefs.current[i];
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        const midpoint = rect.top + rect.height / 2;
+        const crossedUp = i < dragIdx && event.clientY < midpoint;
+        const crossedDown = i > dragIdx && event.clientY > midpoint;
+        if (crossedUp || crossedDown) {
+          setOrderedMethods((prev) => {
+            const next = [...prev];
+            const [moved] = next.splice(dragIdx, 1);
+            next.splice(i, 0, moved);
+            return next;
+          });
+          dragIndexRef.current = i;
+          setDragIndex(i);
+          break;
+        }
+      }
+    }
+
+    function handlePointerUp() {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      dragIndexRef.current = null;
+      setDragIndex(null);
+      document.body.style.userSelect = previousUserSelect;
+      document.body.style.cursor = previousCursor;
+      saveAccountMethodOrder(orderRef.current.map((method) => method.value));
+    }
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+  }
 
   function isEnabled(method: string) {
     return store[method] !== undefined;
@@ -256,16 +549,34 @@ function AccountSettings() {
 
   return (
     <div className="flex flex-col gap-3">
-      {allMethods.map((method) => {
+      {allMethods.map((method, index) => {
         const enabled = isEnabled(method.value);
         const accounts = store[method.value] ?? [];
         const isAdding = addingMethod === method.value;
 
         return (
-          <Card key={method.value} className="gap-0 p-0 overflow-hidden">
+          <Card
+            key={method.value}
+            ref={(el) => { cardRefs.current[index] = el; }}
+            className={cn(
+              "gap-0 p-0 overflow-hidden transition-all",
+              dragIndex === index && "opacity-60 scale-[1.02] shadow-lg border-2 border-blue-500 ring-2 ring-blue-500/40 z-10",
+            )}
+          >
+            {/* Drag handle bar */}
+            <div
+              className={cn(
+                "flex h-4 w-full shrink-0 touch-none items-center justify-center bg-muted text-muted-foreground/60",
+                dragIndex !== null ? "cursor-grabbing" : "cursor-grab",
+              )}
+              onPointerDown={(event) => handleDragHandlePointerDown(index, event)}
+            >
+              <GripHorizontal className="h-3.5 w-3.5" />
+            </div>
+
             {/* Method header */}
-            <div className={cn("flex items-center justify-between px-4 py-3 bg-muted", enabled && "border-b border-border")}>
-              <div className="flex items-center gap-2.5">
+            <div className={cn("flex items-start justify-between px-4 pb-3 bg-muted", enabled && "border-b border-border")}>
+              <div className="flex flex-1 items-center gap-2.5">
                 <PaymentIcon path={method.iconPath} />
                 <span className={cn("text-sm font-semibold", !enabled && "text-muted-foreground")}>
                   {t(`account.${method.value}`)}
@@ -274,7 +585,7 @@ function AccountSettings() {
                   <span className="text-xs text-muted-foreground">{accounts.length}</span>
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-1 items-center justify-end gap-2">
                 {enabled && (
                   <button
                     className="flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground transition hover:bg-background hover:text-foreground"

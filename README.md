@@ -1,10 +1,10 @@
-# JioJio
+<div align="center">
+  <img src="src-tauri/icons/128x128@2x.png" width="100" alt="JioJio">
+  <h1>JioJio</h1>
+  <p><strong>A local-first subscription &amp; account manager for macOS.</strong></p>
+</div>
 
-**A local-first subscription & account manager.**
-
-JioJio helps you keep track of every recurring subscription — and just as importantly, **which account you used to sign up for it**. No more "wait, did I use my Gmail or my work email for this one?"
-
-<p align="left">
+<p align="center">
   <img alt="Tauri" src="https://img.shields.io/badge/Tauri-2-FFC131?logo=tauri&logoColor=white">
   <img alt="React" src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white">
@@ -14,7 +14,22 @@ JioJio helps you keep track of every recurring subscription — and just as impo
   <img alt="License" src="https://img.shields.io/badge/License-MIT-3DA639">
 </p>
 
-简体中文 | [README_CN.md](README_CN.md)
+<p align="center">简体中文 | <a href="README_CN.md">README_CN.md</a></p>
+
+---
+
+<table align="center" cellspacing="8" cellpadding="0" border="0">
+  <tr>
+    <td><img src="docs/screenshots/rounded/总览-eng.png" width="380" alt="Overview"></td>
+    <td><img src="docs/screenshots/rounded/添加-eng.png" width="380" alt="Add Subscription"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/rounded/常用账号-eng.png" width="380" alt="Accounts"></td>
+    <td><img src="docs/screenshots/rounded/ai费用-英文.png" width="380" alt="AI Pricing"></td>
+  </tr>
+</table>
+
+---
 
 ## Why JioJio?
 
@@ -42,11 +57,27 @@ By linking the two, JioJio answers the questions that spreadsheets can't: *"How 
 - **Auto-renew tracking** and **expiry reminders** (same day, or 1/3/7 days before)
 - **Pin important subscriptions** to keep them front and center
 
+<img src="docs/screenshots/rounded/添加-eng.png" width="480" alt="Add Subscription — browse 50+ built-in service templates">
+
 ### Account & Login Management
 - Record the **login method** for each subscription (phone, email, social/third-party login, etc.)
 - Store **account identifiers** so you always know which login belongs to which service
 - View accounts **by account** or **by platform**, and instantly see how many subscriptions each one covers
 - Manage **multiple accounts on the same platform** without losing track
+
+<img src="docs/screenshots/rounded/常用账号-eng.png" width="480" alt="Accounts Settings — manage login identities">
+
+### AI Pricing Reference
+
+JioJio includes a built-in **AI Plans** reference panel in Settings, covering ChatGPT, Claude, and Gemini:
+
+- Browse every plan tier (Free, Plus, Pro, Team, etc.) in one place
+- **Converted Price** column — all prices converted to your local currency at current exchange rates, so you can compare apples to apples
+- **Ranked by price** — rows sorted from cheapest to most expensive, with a row index so you can see at a glance where each region stands
+- Prices span **30+ countries and regions** with their local currency originals alongside the converted amount
+- Data updated periodically to reflect the latest regional pricing
+
+<img src="docs/screenshots/rounded/ai费用-英文.png" width="480" alt="AI Plans — global pricing reference for ChatGPT, Claude, and Gemini">
 
 ### Financial Overview
 - **Dashboard** with monthly cost, annualized cost, and upcoming payments

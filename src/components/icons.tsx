@@ -1,15 +1,40 @@
 import {
+  AE,
+  AR,
   AU,
+  BR,
   CA,
+  CH,
+  CL,
   CN,
+  CO,
+  DE,
+  DK,
+  EG,
   EU,
+  FR,
   GB,
   HK,
+  ID,
+  IL,
+  IN,
   JP,
+  KR,
+  KZ,
+  MX,
+  MY,
   NG,
+  NO,
+  PH,
+  PK,
+  SA,
   SG,
+  TH,
   TR,
+  TW,
   US,
+  VN,
+  ZA,
 } from "country-flag-icons/react/3x2";
 import { ImagePlus } from "lucide-react";
 import { iconPath } from "../lib/subscriptions";
@@ -17,7 +42,10 @@ import type { Subscription } from "../lib/subscriptions";
 import { usePreferences } from "../i18n";
 import { cn } from "../lib/utils";
 
-export const flagComponents = { AU, CA, CN, EU, GB, HK, JP, NG, SG, TR, US };
+export const flagComponents = {
+  AE, AR, AU, BR, CA, CH, CL, CN, CO, DE, DK, EG, EU, FR, GB, HK, ID, IL, IN, JP,
+  KR, KZ, MX, MY, NG, NO, PH, PK, SA, SG, TH, TR, TW, US, VN, ZA,
+};
 
 export function PaymentIcon({ path }: { path: string }) {
   return (

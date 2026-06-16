@@ -5,11 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { categoryOptions, daysUntil, formatMoney, parseLocalDate, subscriptionStatus, toCny } from "../lib/subscriptions";
-import type { Subscription } from "../lib/subscriptions";
+import { categoryOptions, daysUntil, parseLocalDate, subscriptionStatus, toCny } from "../lib/subscriptions";
+import type { CurrencyCode, Subscription } from "../lib/subscriptions";
 import { usePreferences } from "../i18n";
 import { buildMonthlyCashflowTimeline, buildMonthlyCostDistribution, monthlyUnitCny } from "../lib/sorting";
-import { categoryText, formatDisplayDate, formatPercent, cycleText, overviewMoneyLabel, overviewUpcomingTimingText, serviceLabel } from "../lib/format";
+import { categoryText, formatDisplayDate, formatMoneyFromCny, formatPercent, cycleText, overviewMoneyLabel, overviewUpcomingTimingText, serviceLabel } from "../lib/format";
 import { ServiceIcon } from "../components/icons";
 import { EmptyDetail } from "./EmptyDetail";
 import { cn } from "../lib/utils";
@@ -23,7 +23,7 @@ export function OverviewDashboard({
   onAdd: () => void;
   onOpen: (subscription: Subscription) => void;
 }) {
-  const { language, t } = usePreferences();
+  const { language, t, displayCurrency } = usePreferences();
   const [upcomingFilter, setUpcomingFilter] = useState<"all" | "expiring" | "renewing">("all");
   const stats = useMemo(() => {
     const active = subscriptions.filter((subscription) => subscriptionStatus(subscription) === "active");
@@ -101,19 +101,19 @@ export function OverviewDashboard({
         <OverviewMetricCard
           icon={<CircleDollarSign className="h-4 w-4" />}
           label={t("overview.monthlyCost")}
-          value={formatMoney(stats.monthlyCny, "CNY")}
-          detail={`${t("overview.annualCost")} ${formatMoney(stats.annualCny, "CNY")}`}
+          value={formatMoneyFromCny(stats.monthlyCny, displayCurrency)}
+          detail={`${t("overview.annualCost")} ${formatMoneyFromCny(stats.annualCny, displayCurrency)}`}
         />
         <OverviewMetricCard
           icon={<CalendarDays className="h-4 w-4" />}
           label={t("overview.due7")}
-          value={formatMoney(stats.due7Cny, "CNY")}
-          detail={`${t("overview.due30")} ${formatMoney(stats.due30Cny, "CNY")}`}
+          value={formatMoneyFromCny(stats.due7Cny, displayCurrency)}
+          detail={`${t("overview.due30")} ${formatMoneyFromCny(stats.due30Cny, displayCurrency)}`}
         />
         <OverviewMetricCard
           icon={<Clock3 className="h-4 w-4" />}
           label={t("overview.topMonthly")}
-          value={stats.topMonthly ? formatMoney(monthlyUnitCny(stats.topMonthly), "CNY") : "-"}
+          value={stats.topMonthly ? formatMoneyFromCny(monthlyUnitCny(stats.topMonthly), displayCurrency) : "-"}
           detail={stats.topMonthly ? serviceLabel(stats.topMonthly, t) : t("overview.noActiveSpend")}
         />
       </div>
@@ -122,7 +122,7 @@ export function OverviewDashboard({
         <Card className="gap-0 border border-border p-0 ring-0">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div className="text-sm font-bold">{t("overview.categoryShare")}</div>
-            <Badge variant="secondary">{formatMoney(stats.monthlyCny, "CNY")}</Badge>
+            <Badge variant="secondary">{formatMoneyFromCny(stats.monthlyCny, displayCurrency)}</Badge>
           </div>
           {stats.categoryRows.length === 0 ? (
             <div className="flex h-32 items-center justify-center text-sm font-medium text-muted-foreground">
@@ -131,7 +131,7 @@ export function OverviewDashboard({
           ) : (
             <div className="flex flex-col gap-3 p-4">
               {stats.categoryRows.map((category) => (
-                <OverviewCategoryRow key={category.value} label={category.label} amount={formatMoney(category.amountCny, "CNY")} share={category.share} />
+                <OverviewCategoryRow key={category.value} label={category.label} amount={formatMoneyFromCny(category.amountCny, displayCurrency)} share={category.share} />
               ))}
             </div>
           )}
@@ -144,7 +144,7 @@ export function OverviewDashboard({
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div className="flex min-w-0 items-center gap-2">
               <div className="text-sm font-bold">{t("overview.upcomingPayments")}</div>
-              <Badge variant="secondary">{overviewMoneyLabel(visibleUpcomingAmountCny)}</Badge>
+              <Badge variant="secondary">{overviewMoneyLabel(visibleUpcomingAmountCny, displayCurrency)}</Badge>
             </div>
             <ToggleGroup
               type="single"
@@ -188,7 +188,7 @@ export function OverviewDashboard({
                         </div>
                       </TableCell>
                       <TableCell className="py-2 text-right text-muted-foreground">
-                        <div className="font-semibold text-foreground">{overviewMoneyLabel(amountCny)}</div>
+                        <div className="font-semibold text-foreground">{overviewMoneyLabel(amountCny, displayCurrency)}</div>
                         <div className="text-[11px]">{formatDisplayDate(subscription.endDate, language)}</div>
                       </TableCell>
                     </TableRow>
@@ -229,7 +229,7 @@ export function OverviewDashboard({
         </Card>
       </div>
 
-      <OverviewCashflowTimelineCard items={stats.cashflowTimeline} title={t("overview.cashflowTimeline")} description={t("overview.cashflowTimelineDescription")} />
+      <OverviewCashflowTimelineCard items={stats.cashflowTimeline} title={t("overview.cashflowTimeline")} description={t("overview.cashflowTimelineDescription")} currency={displayCurrency} />
     </div>
   );
 }
@@ -308,10 +308,12 @@ function OverviewCashflowTimelineCard({
   items,
   title,
   description,
+  currency,
 }: {
   items: Array<{ key: string; label: string; amountCny: number; isForecast: boolean; yearLabel: string }>;
   title: string;
   description: string;
+  currency: CurrencyCode;
 }) {
   const maxAmount = Math.max(...items.map((item) => item.amountCny), 1);
   const historicalItems = items.filter((item) => !item.isForecast);
@@ -342,7 +344,7 @@ function OverviewCashflowTimelineCard({
                   className={cn("absolute w-full truncate text-center text-[10px] font-semibold", item.isForecast ? "text-muted-foreground" : "text-foreground")}
                   style={{ bottom: height + 6 }}
                 >
-                  {item.amountCny === 0 ? "Free" : formatMoney(item.amountCny, "CNY")}
+                  {item.amountCny === 0 ? "Free" : formatMoneyFromCny(item.amountCny, currency)}
                 </div>
                 <div
                   className={cn(

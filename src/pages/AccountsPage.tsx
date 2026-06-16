@@ -6,7 +6,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { accountMethodOptions, daysUntil, formatMoney, subscriptionStatus } from "../lib/subscriptions";
 import type { Subscription, SubscriptionCategory } from "../lib/subscriptions";
 import { usePreferences } from "../i18n";
-import { loadAccountStore } from "../lib/accountStore";
+import { getOrderedAccountMethodOptions, loadAccountStore } from "../lib/accountStore";
 import { monthlyUnitCny } from "../lib/sorting";
 import { accountTimingText, categoryText, serviceLabel } from "../lib/format";
 import { PaymentIcon, ServiceIcon } from "../components/icons";
@@ -69,7 +69,7 @@ export function AccountsPage({
       methodMap.get(method)!.get(id)!.subscriptions.push(sub);
     }
 
-    return accountMethodOptions
+    return getOrderedAccountMethodOptions()
       .filter((opt) => methodMap.has(opt.value) && methodMap.get(opt.value)!.size > 0)
       .map((opt) => {
         const accounts = Array.from(methodMap.get(opt.value)!.values()).sort(

@@ -31,10 +31,13 @@ import {
   PreferencesContext,
   readStoredLanguage,
   readStoredTheme,
+  readStoredDisplayCurrency,
   themeStorageKey,
   languageStorageKey,
+  displayCurrencyStorageKey,
   translations,
 } from "./i18n";
+import type { CurrencyCode } from "./lib/subscriptions";
 import type { LanguageCode, PreferencesContextValue, ThemePreference } from "./i18n";
 import { lockWindowWidth, startWindowDrag } from "./lib/window";
 import { categoryText, overviewUpcomingTimingText, relativeEnd, serviceLabel, statusText } from "./lib/format";
@@ -72,6 +75,7 @@ export default function App() {
   const [isSidebarUpcomingOpen, setIsSidebarUpcomingOpen] = useState(false);
   const [language, setLanguage] = useState<LanguageCode>(() => readStoredLanguage());
   const [theme, setTheme] = useState<ThemePreference>(() => readStoredTheme());
+  const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode>(() => readStoredDisplayCurrency());
 
   useEffect(() => {
     saveSubscriptions(subscriptions);
@@ -80,6 +84,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(languageStorageKey, language);
   }, [language]);
+
+  useEffect(() => {
+    localStorage.setItem(displayCurrencyStorageKey, displayCurrency);
+  }, [displayCurrency]);
 
   useEffect(() => {
     localStorage.setItem(themeStorageKey, theme);
@@ -126,9 +134,11 @@ export default function App() {
       setLanguage,
       theme,
       setTheme,
+      displayCurrency,
+      setDisplayCurrency,
       t: (key) => translations[language][key] ?? key,
     }),
-    [language, theme],
+    [language, theme, displayCurrency],
   );
   const t = preferences.t;
 
@@ -430,6 +440,9 @@ export default function App() {
                 <ToggleGroupItem className="settings-segment-button w-20 data-[state=on]:bg-zinc-200 data-[state=on]:text-zinc-950 dark:data-[state=on]:bg-white dark:data-[state=on]:text-zinc-950" value="exchange">
                   {t("settings.exchange")}
                 </ToggleGroupItem>
+                <ToggleGroupItem className="settings-segment-button w-20 data-[state=on]:bg-zinc-200 data-[state=on]:text-zinc-950 dark:data-[state=on]:bg-white dark:data-[state=on]:text-zinc-950" value="aiPricing">
+                  {t("settings.aiPricing")}
+                </ToggleGroupItem>
               </ToggleGroup>
               <QuickPreferenceButtons
                 language={language}
@@ -486,7 +499,9 @@ export default function App() {
           <div
             className={cn(
               "mx-auto flex w-full flex-col gap-4 px-3 py-4",
-              mainView === "detailSubscriptions" && detailDisplayMode === "table" ? "h-full min-h-0 overflow-hidden" : "min-h-full",
+              (mainView === "detailSubscriptions" && detailDisplayMode === "table") || (mainView === "settings" && settingsTab === "aiPricing")
+                ? "h-full min-h-0 overflow-hidden"
+                : "min-h-full",
             )}
           >
             {mainView === "addSelect" ? (

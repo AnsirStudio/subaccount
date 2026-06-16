@@ -1,14 +1,15 @@
 import {
-  accountMethodOptions,
   billingCycleOptions,
   categoryOptions,
   currencyOptions,
   daysUntil,
   formatMoney,
+  fromCny,
   paymentMethodOptions,
   parseLocalDate,
   subscriptionStatus,
 } from "../lib/subscriptions";
+import { getOrderedAccountMethodOptions } from "../lib/accountStore";
 import type { CurrencyCode, ServiceTemplate, Subscription } from "../lib/subscriptions";
 import { translations } from "../i18n";
 import type { LanguageCode } from "../i18n";
@@ -128,7 +129,7 @@ export function localizedPaymentOptions(t: (key: string) => string) {
 }
 
 export function localizedAccountOptions(t: (key: string) => string) {
-  return accountMethodOptions.map((option) => ({ ...option, label: t(`account.${option.value}`) }));
+  return getOrderedAccountMethodOptions().map((option) => ({ ...option, label: t(`account.${option.value}`) }));
 }
 
 export function localizedCategoryOptions(t: (key: string) => string) {
@@ -184,8 +185,12 @@ export function overviewUpcomingTimingText(days: number, isAutoRenewEnabled: boo
   return days === 0 ? `Today ${action}` : `${days} ${t("relative.days")} later ${action}`;
 }
 
-export function overviewMoneyLabel(amountCny: number) {
-  return amountCny === 0 ? "Free" : formatMoney(amountCny, "CNY");
+export function formatMoneyFromCny(amountCny: number, currency: CurrencyCode) {
+  return formatMoney(fromCny(amountCny, currency), currency);
+}
+
+export function overviewMoneyLabel(amountCny: number, currency: CurrencyCode) {
+  return amountCny === 0 ? "Free" : formatMoneyFromCny(amountCny, currency);
 }
 
 export function formatExchangeAmount(amount: number) {
