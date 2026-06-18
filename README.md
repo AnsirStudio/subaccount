@@ -111,8 +111,23 @@ JioJio includes a built-in **AI Plans** reference panel in Settings, covering Ch
 
 Each release ships two `.dmg` files for macOS:
 
-- **`JioJio_x.y.z_aarch64.dmg`** — for Apple Silicon Macs (M1/M2/M3/M4 and newer). Smaller download, native performance.
-- **`JioJio_x.y.z_universal.dmg`** — a universal binary that runs on both Apple Silicon and Intel Macs. Larger download; pick this one if you're on an Intel Mac.
+- **`JioJio_x.y.z_苹果芯片.dmg`** — for Apple Silicon Macs (M1/M2/M3/M4 and newer). Smaller download, native performance.
+- **`JioJio_x.y.z_Intel芯片.dmg`** — for Intel-based Macs.
+
+### Installing the App
+
+1. Open the `.dmg` and drag **JioJio** into your **Applications** folder.
+2. The first time you launch it, macOS may say **"JioJio is damaged and can't be opened. You should move it to the Trash."**
+
+   This does **not** mean the app is broken. JioJio is not yet signed/notarized with an Apple Developer certificate, so macOS quarantines it after download. To remove the quarantine flag and run it, open **Terminal** and run:
+
+   ```bash
+   sudo xattr -rd com.apple.quarantine /Applications/JioJio.app
+   ```
+
+   Then open JioJio normally. You only need to do this once per install.
+
+   > Alternatively, go to **System Settings → Privacy & Security**, scroll down, and click **Open Anyway** after the first blocked launch.
 
 ## Getting Started
 

@@ -113,8 +113,23 @@ JioJio 围绕两个互相关联的概念构建：
 
 每个发布版本都包含两个 macOS 安装包：
 
-- **`JioJio_x.y.z_aarch64.dmg`** —— 适用于搭载 Apple 芯片（M 系列：M1/M2/M3/M4 及更新机型）的 Mac，体积更小，原生性能更佳。
-- **`JioJio_x.y.z_universal.dmg`** —— 通用版本，同时支持 Apple 芯片和 Intel 芯片的 Mac。体积稍大；如果你使用 Intel Mac，请选择这个版本。
+- **`JioJio_x.y.z_苹果芯片.dmg`** —— 适用于搭载 Apple 芯片（M 系列：M1/M2/M3/M4 及更新机型）的 Mac，体积更小，原生性能更佳。
+- **`JioJio_x.y.z_Intel芯片.dmg`** —— 适用于 Intel 芯片的 Mac。
+
+### 安装应用
+
+1. 打开 `.dmg`，将 **JioJio** 拖入**「应用程序」**文件夹。
+2. 首次启动时，macOS 可能会提示 **「"JioJio" 已损坏，无法打开。你应该将它移到废纸篓。」**
+
+   这**并不代表应用真的损坏**。JioJio 目前还没有用 Apple 开发者证书签名和公证，所以从网上下载后会被系统加上「隔离」标记。要去掉这个标记并正常运行，请打开**「终端」**执行：
+
+   ```bash
+   sudo xattr -rd com.apple.quarantine /Applications/JioJio.app
+   ```
+
+   然后再正常打开 JioJio 即可。每次重新安装只需执行一次。
+
+   > 或者：前往**「系统设置 → 隐私与安全性」**，向下滚动，在首次被拦截后点击**「仍要打开」**。
 
 ## 快速开始
 
